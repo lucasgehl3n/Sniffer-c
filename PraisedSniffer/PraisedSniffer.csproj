@@ -73,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ARPHeader.cs" />
     <Compile Include="IGMPv2Header.cs" />
     <Compile Include="ICMPv4Header.cs" />
     <Compile Include="ICMPv6Header.cs" />

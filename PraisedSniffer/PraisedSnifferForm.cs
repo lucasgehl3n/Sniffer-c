@@ -20,7 +20,7 @@ namespace PraisedSniffer
         Thread sniffing;
         int packetNumber;
 
-        private void ComboBox1_SelectedIndexChanged(object sender,System.EventArgs e)
+        private void ComboBox1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
             filtroSelecionado = comboBox1.SelectedItem.ToString();
         }
@@ -114,7 +114,7 @@ namespace PraisedSniffer
 
         public void Device_OnPacketArrival(object sender, CaptureEventArgs e)
         {
-            var packet = PacketDotNet.Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
+            var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
 
             var ipPacket = (IpPacket)packet.Extract(typeof(IpPacket));
 
@@ -144,7 +144,31 @@ namespace PraisedSniffer
                 Action action = () => listPackets.Items.Add(item);
                 listPackets.Invoke(action);
             }
+            else
+            {
+
+                if (((EthernetPacket)packet).Type == EthernetPacketType.Arp)
+                {
+                    ARPPacket arpPacket = packet.Extract(typeof(ARPPacket)) as ARPPacket;
+                    ARPPacketAddItemsList(arpPacket);
+                    capturedPackets_list.Add(packetNumber, packet);
+                }
+            }
             packetNumber++;
+        }
+
+        private void ARPPacketAddItemsList(ARPPacket arpPacket)
+        {
+            var senderProtocolAddress = arpPacket.SenderHardwareAddress.ToString();
+            var targetProtocolAddress = arpPacket.TargetProtocolAddress.ToString();
+
+            ListViewItem arpItem = new ListViewItem(packetNumber.ToString());
+            arpItem.SubItems.Add(targetProtocolAddress);
+            arpItem.SubItems.Add(senderProtocolAddress);
+            arpItem.SubItems.Add("ARP");
+
+            Action arpAction = () => listPackets.Items.Add(arpItem);
+            listPackets.Invoke(arpAction);
         }
 
         private void listPackets_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -162,15 +186,21 @@ namespace PraisedSniffer
                 BinaryReader binaryReader = new BinaryReader(memoryStream);
                 treeView1.Nodes.Clear();
 
-                if (((PacketDotNet.EthernetPacket)packet).Type == PacketDotNet.EthernetPacketType.IpV4)
+                if (((EthernetPacket)packet).Type == PacketDotNet.EthernetPacketType.IpV4)
                 {
                     ipHeader = new IPHeaderV4(binaryReader, this.ip2l);
                     MakeInformationIP(ipHeader);
                 }
-                else if (((PacketDotNet.EthernetPacket)packet).Type == PacketDotNet.EthernetPacketType.IpV6)
+                else if (((EthernetPacket)packet).Type == PacketDotNet.EthernetPacketType.IpV6)
                 {
                     ipHeader = new IPHeaderV6(binaryReader, this.ip2l);
                     MakeInformationIP(ipHeader);
+                }
+                else if (((EthernetPacket)packet).Type == EthernetPacketType.Arp)
+                {
+                    ARPPacket arpPacket = packet.Extract(typeof(ARPPacket)) as ARPPacket;
+                    var arpHeader = new ARPHeader(arpPacket);
+                    MakeInformationARP(arpHeader);
                 }
                 else
                 {
@@ -364,6 +394,22 @@ namespace PraisedSniffer
             });
 
             treeView1.Nodes.Add(igmpNode);
+        }
+
+        private void MakeInformationARP(ARPHeader arpHeader)
+        {
+            TreeNode arpNode = new TreeNode("ARP", new TreeNode[]{
+                new TreeNode($"Operação: {arpHeader.Operation}"),
+                new TreeNode($"TargetHardwareAddress (Endereço de Hardware do Destino): {arpHeader.TargetHardwareAddress}"),
+                new TreeNode($"TargetProtocolAddress (Endereço de Protocolo do Destino): {arpHeader.TargetProtocolAddress}"),
+                new TreeNode($"SenderHardwareAddress (Endereço de Hardware do Remetente): {arpHeader.SenderHardwareAddress}"),
+                new TreeNode($"SenderProtocolAddress (Endereço de Protocolo do Remetente): {arpHeader.SenderProtocolAddress}"),
+                new TreeNode($"ProtocolAddressLength (Tamanho do Endereço de Protocolo): {arpHeader.ProtocolAddressLength}"),
+                new TreeNode($"HardwareAddressLength (Tamanho do Endereço de Hardware): {arpHeader.HardwareAddressLength}")
+            });
+
+
+            treeView1.Nodes.Add(arpNode);
         }
 
         private void button1_Click(object sender, EventArgs e)

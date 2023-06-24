@@ -20,7 +20,7 @@ namespace PraisedSniffer
         private byte[] _sourceAddress = new byte[16];
         private byte[] _destinationAddress = new byte[16];
 
-        public IPHeaderV6(BinaryReader binaryReader,IP2Location.Component ip2l)
+        public IPHeaderV6(BinaryReader binaryReader, IP2Location.Component ip2l)
         {
             _versionTrafficClassAndFlowLabel = (uint)IPAddress.NetworkToHostOrder(binaryReader.ReadInt32());
 
@@ -30,12 +30,12 @@ namespace PraisedSniffer
 
             _hopLimit = binaryReader.ReadByte();
 
-            for(int i = 0; i < 16; i++)
+            for (int i = 0; i < 16; i++)
             {
                 _sourceAddress[i] = binaryReader.ReadByte();
             }
 
-            SourceAddress = new ExtendedIpAddress(_sourceAddress,ip2l);
+            SourceAddress = new ExtendedIpAddress(_sourceAddress, ip2l);
             SourceAddress.ToString();
 
             for (int i = 0; i < 16; i++)
@@ -43,7 +43,7 @@ namespace PraisedSniffer
                 _destinationAddress[i] = binaryReader.ReadByte();
             }
 
-            DestinationAddress = new ExtendedIpAddress(_destinationAddress,ip2l);
+            DestinationAddress = new ExtendedIpAddress(_destinationAddress, ip2l);
         }
 
         public string Version
@@ -107,10 +107,10 @@ namespace PraisedSniffer
                 uint flowLabel = _versionTrafficClassAndFlowLabel << 12;
                 flowLabel >>= 12;
 
-                return string.Format("0x{0:x2}",flowLabel);
+                return string.Format("0x{0:x2}", flowLabel);
             }
         }
-        
+
         public string PayloadLength
         {
             get
@@ -123,17 +123,30 @@ namespace PraisedSniffer
         {
             get
             {
-                if(_nextHeader == 6)
+                switch (_nextHeader)
                 {
-                    return "TCP";
-                }
-                else if(_nextHeader == 17)
-                {
-                    return "UDP";
-                }
-                else
-                {
-                    return "Desconhecido";
+                    case 6:
+                        return "TCP";
+                    case 17:
+                        return "UDP";
+                    case 41:
+                        return "Encapsulamento de Cabeçalho IPv6";
+                    case 43:
+                        return "Cabeçalho de Roteamento";
+                    case 44:
+                        return "Cabeçalho de Fragmentação";
+                    case 50:
+                        return "Carga de Segurança de Encapsulamento";
+                    case 51:
+                        return "Cabeçalho de Autenticação";
+                    case 58:
+                        return "ICMPv6";
+                    case 59:
+                        return "Nenhum";
+                    case 60:
+                        return "Cabeçalho de Opções de Destino";
+                    default:
+                        return "Desconhecido";
                 }
             }
         }

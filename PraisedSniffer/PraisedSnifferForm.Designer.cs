@@ -134,7 +134,7 @@
             this.treeView1.Location = new System.Drawing.Point(5, 20);
             this.treeView1.Margin = new System.Windows.Forms.Padding(2);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(466, 326);
+            this.treeView1.Size = new System.Drawing.Size(467, 326);
             this.treeView1.TabIndex = 6;
             // 
             // label3
@@ -181,17 +181,19 @@
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Todos",
+            "TCP",
+            "UDP",
+            "ICMP",
+            "ICMPV6",
+            "IP",
+            "IGMP",
+            "ARP"});
             this.comboBox1.Location = new System.Drawing.Point(171, 27);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(109, 21);
             this.comboBox1.TabIndex = 11;
-            this.comboBox1.Items.Add("Todos");
-            this.comboBox1.Items.Add("TCP");
-            this.comboBox1.Items.Add("UDP");
-            this.comboBox1.Items.Add("ICMP");
-            this.comboBox1.Items.Add("ICMPV6");
-            this.comboBox1.Items.Add("IP");
-            this.comboBox1.Items.Add("IGMP");
             // 
             // label5
             // 
